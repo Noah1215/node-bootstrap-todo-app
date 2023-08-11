@@ -15,47 +15,25 @@
       integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh"
       crossorigin="anonymous"
     />
+
     <link rel="stylesheet" href="/public/main.css" />
 
     <title>Todo App</title>
   </head>
   <body>
     <%- include('nav.html') %>
-    <h4 class="ml-4 my-3 text-center">Todo List</h4>
 
-    <div class="container">
-      <ul class="list-group">
-        <% for (var i = 0; i < posts.length; i++){ %>
-        <li class="list-group-item">
-          <h4>Todo : <%= posts[i].title %></h4>
-          <p>Due Date : <%= posts[i].date%></p>
-          <button class="btn btn-danger delete" data-id="<%= posts[i]._id %>">
-            Delete
-          </button>
-        </li>
-        <% } %>
-      </ul>
+    <div class="container mt-3">
+      <h4 class="text-center">Todo Detail</h4>
+      <div class="card" style="width: 100%">
+        <div class="card-body">
+          <h5 class="card-title"><%= detail.title %></h5>
+          <h6 class="card-subtitle mb-2 text-muted"><%= detail.date %></h6>
+          <p class="card-text">임시내용입니다.</p>
+          <a href="#" class="card-link">Modify</a>
+        </div>
+      </div>
     </div>
-
-    <!-- AJAX? -->
-    <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
-    <script>
-      $(".delete").click((e) => {
-        let id = e.target.dataset.id;
-        let current = $(this);
-        $.ajax({
-          method: "DELETE",
-          url: "/delete",
-          data: { _id: id },
-        })
-          .done((result) => {
-            current.parent("li").fadeOut();
-          })
-          .fail(() => {
-            console.log("Something is wrong...");
-          });
-      });
-    </script>
 
     <!-- Optional JavaScript -->
     <!-- jQuery first, then Popper.js, then Bootstrap JS -->

@@ -2,8 +2,11 @@ const express = require("express");
 const app = express();
 const bodyParser = require("body-parser");
 const MongoClient = require("mongodb").MongoClient;
+
 app.use(bodyParser.urlencoded({ extended: true }));
 app.set("view engine", "ejs");
+app.use("/public", express.static("public"));
+
 let db;
 
 MongoClient.connect(
@@ -21,11 +24,11 @@ MongoClient.connect(
 //REST 원칙
 
 app.get("/", (req, res) => {
-  res.sendFile(__dirname + "/index.html");
+  res.render("index.ejs");
 });
 
 app.get("/add", (req, res) => {
-  res.sendFile(__dirname + "/add.html");
+  res.render("add.ejs");
 });
 
 app.get("/list", (req, res) => {
@@ -39,6 +42,16 @@ app.get("/list", (req, res) => {
         posts: result,
       });
     });
+});
+
+app.get("/detail/:id", (req, res) => {
+  db.collection("post").findOne(
+    { _id: parseInt(req.params.id) },
+    (err, result) => {
+      console.log(result);
+      res.render("detail.ejs", { detail: result });
+    }
+  );
 });
 
 app.post("/addTodo", (req, res) => {
@@ -60,5 +73,16 @@ app.post("/addTodo", (req, res) => {
         );
       }
     );
+  });
+});
+
+app.delete("/delete", (req, res) => {
+  req.body._id = parseInt(req.body._id);
+  db.collection("post").deleteOne(req.body, (err, result) => {
+    if (err) {
+      res.status(400);
+      return console.error(err);
+    }
+    res.status(200).send({ message: "Complete!" });
   });
 });
