@@ -49,6 +49,11 @@
       </div>
     </nav>
 
+    <% for(let i =0; i < posts.length; i++){ %>
+    <h4>Todo: <%= posts[i].title %></h4>
+    <p>Due Date: <%= posts[i].date%></p>
+    <%}%>
+
     <!-- Optional JavaScript -->
     <!-- jQuery first, then Popper.js, then Bootstrap JS -->
     <script
