@@ -3,26 +3,33 @@ const app = express();
 const bodyParser = require("body-parser");
 const MongoClient = require("mongodb").MongoClient;
 const methodOverride = require("method-override");
+const passport = require("passport");
+const LocalStrategy = require("passport-local").Strategy;
+const session = require("express-session");
+require("dotenv").config();
 
+app.use("/public", express.static("public"));
+app.use(
+  session({ secret: "secretCode", resave: true, saveUninitialized: false })
+);
+app.use(passport.initialize());
+app.use(passport.session());
 app.use(methodOverride("_method"));
 app.use(bodyParser.urlencoded({ extended: true }));
+
 app.set("view engine", "ejs");
-app.use("/public", express.static("public"));
 
 let db;
 
-MongoClient.connect(
-  "mongodb+srv://cwpark1215:park1215@todoapp.amydrnc.mongodb.net/",
-  (error, client) => {
-    if (error) return console.log(error);
+MongoClient.connect(process.env.DB_URL, (error, client) => {
+  if (error) return console.log(error);
 
-    db = client.db("todoapp");
+  db = client.db("todoapp");
 
-    app.listen("8080", function () {
-      console.log("listening on 8080");
-    });
-  }
-);
+  app.listen(process.env.PORT, function () {
+    console.log("listening on 8080");
+  });
+});
 //REST 원칙
 
 app.get("/", (req, res) => {
@@ -66,6 +73,14 @@ app.get("/edit/:id", (req, res) => {
   );
 });
 
+app.get("/mypage", isUser, (req, res) => {
+  res.render("myPage.ejs", { user: req.user });
+});
+
+app.get("/login", (req, res) => {
+  res.render("login.ejs");
+});
+
 app.put("/edit", (req, res) => {
   db.collection("post").updateOne(
     { _id: parseInt(req.body.id) },
@@ -101,6 +116,51 @@ app.post("/addTodo", (req, res) => {
   });
 });
 
+app.post(
+  "/login",
+  passport.authenticate("local", {
+    failureRedirect: "/fail",
+  }),
+  (req, res) => {
+    res.redirect("/");
+  }
+);
+
+passport.use(
+  new LocalStrategy(
+    {
+      usernameField: "id",
+      passwordField: "pw",
+      session: true,
+      passReqToCallback: false,
+    },
+    (id, pw, done) => {
+      db.collection("login").findOne({ id: id }, (err, result) => {
+        if (err) return done(err);
+
+        if (!result)
+          return done(null, false, { message: "Your id is not existed" });
+
+        if (pw == result.pw) {
+          return done(null, result);
+        } else {
+          return done(null, false, { message: "Wrong Password!" });
+        }
+      });
+    }
+  )
+);
+
+passport.serializeUser((user, done) => {
+  done(null, user.id);
+});
+
+passport.deserializeUser((id, done) => {
+  db.collection("login").findOne({ id: id }, (err, result) => {
+    done(null, result);
+  });
+});
+
 app.delete("/delete", (req, res) => {
   req.body._id = parseInt(req.body._id);
   db.collection("post").deleteOne(req.body, (err, result) => {
@@ -112,3 +172,11 @@ app.delete("/delete", (req, res) => {
     res.redirect("/list");
   });
 });
+
+function isUser(req, res, next) {
+  if (req.user) {
+    next();
+  } else {
+    res.send("You should login");
+  }
+}
