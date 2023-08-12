@@ -2,7 +2,9 @@ const express = require("express");
 const app = express();
 const bodyParser = require("body-parser");
 const MongoClient = require("mongodb").MongoClient;
+const methodOverride = require("method-override");
 
+app.use(methodOverride("_method"));
 app.use(bodyParser.urlencoded({ extended: true }));
 app.set("view engine", "ejs");
 app.use("/public", express.static("public"));
@@ -54,6 +56,28 @@ app.get("/detail/:id", (req, res) => {
   );
 });
 
+app.get("/edit/:id", (req, res) => {
+  db.collection("post").findOne(
+    { _id: parseInt(req.params.id) },
+    (err, result) => {
+      if (err) return console.error(err);
+      res.render("edit.ejs", { post: result });
+    }
+  );
+});
+
+app.put("/edit", (req, res) => {
+  db.collection("post").updateOne(
+    { _id: parseInt(req.body.id) },
+    { $set: { title: req.body.title, date: req.body.date } },
+    (err, result) => {
+      if (err) return console.error(err);
+      console.log("Edit: Complete");
+      res.redirect("/list");
+    }
+  );
+});
+
 app.post("/addTodo", (req, res) => {
   db.collection("counter").findOne({ name: "numOfPosts" }, (err, result) => {
     let numOfPosts = result.totalposts;
@@ -61,7 +85,7 @@ app.post("/addTodo", (req, res) => {
     db.collection("post").insertOne(
       { _id: numOfPosts + 1, title: req.body.title, date: req.body.date },
       (err, result) => {
-        console.log("Complete");
+        console.log("Add: Complete");
         db.collection("counter").updateOne(
           { name: "numOfPosts" },
           { $inc: { totalposts: 1 } },
@@ -69,6 +93,7 @@ app.post("/addTodo", (req, res) => {
             if (err) {
               return console.error(err);
             }
+            res.redirect("/list");
           }
         );
       }
@@ -83,6 +108,7 @@ app.delete("/delete", (req, res) => {
       res.status(400);
       return console.error(err);
     }
-    res.status(200).send({ message: "Complete!" });
+    res.status(200).send({ message: "Delete: Complete!" });
+    res.redirect("/list");
   });
 });
