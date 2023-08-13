@@ -23,6 +23,13 @@
     <%- include('nav.html') %>
     <h4 class="ml-4 my-3 text-center">Todo List</h4>
 
+    <div class="container input-group mb-2">
+      <input id="search-input" class="form-control" />
+      <button id="search" class="input-group-append btn btn-danger">
+        Search
+      </button>
+    </div>
+
     <div class="container">
       <ul class="list-group">
         <% for (var i = 0; i < posts.length; i++){ %>
@@ -54,6 +61,13 @@
           .fail(() => {
             console.log("Something is wrong...");
           });
+      });
+    </script>
+
+    <script>
+      $("#search").click(() => {
+        const searchTodo = $("#search-input").val();
+        window.location.replace("/search?value=" + searchTodo);
       });
     </script>
 

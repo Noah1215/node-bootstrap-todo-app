@@ -6,6 +6,8 @@ const methodOverride = require("method-override");
 const passport = require("passport");
 const LocalStrategy = require("passport-local").Strategy;
 const session = require("express-session");
+const multer = require("multer");
+
 require("dotenv").config();
 
 app.use("/public", express.static("public"));
@@ -20,6 +22,26 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.set("view engine", "ejs");
 
 let db;
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, "./public/images");
+  },
+
+  filename: (req, file, cb) => {
+    cb(null, file.originalname);
+  },
+});
+
+const upload = multer({
+  storage: storage,
+  fileFilter: (req, file, callback) => {
+    const ext = path.extname(file.originalname);
+    if (ext !== ".png" && ext !== ".jpg" && ext !== ".jpeg") {
+      return callback(new Error("Upload image file!"));
+    }
+    callback(null, true);
+  },
+});
 
 MongoClient.connect(process.env.DB_URL, (error, client) => {
   if (error) return console.log(error);
@@ -81,6 +103,21 @@ app.get("/login", (req, res) => {
   res.render("login.ejs");
 });
 
+app.get("/search", (req, res) => {
+  db.collection("post")
+    .find({ $text: { $search: req.query.value } })
+    .toArray((err, result) => {
+      if (err) return console.error(err);
+      res.render("list.ejs", {
+        posts: result,
+      });
+    });
+});
+
+app.get("/upload", (req, res) => {
+  res.render("upload.ejs");
+});
+
 app.put("/edit", (req, res) => {
   db.collection("post").updateOne(
     { _id: parseInt(req.body.id) },
@@ -98,7 +135,12 @@ app.post("/addTodo", (req, res) => {
     let numOfPosts = result.totalposts;
 
     db.collection("post").insertOne(
-      { _id: numOfPosts + 1, title: req.body.title, date: req.body.date },
+      {
+        _id: numOfPosts + 1,
+        writer: req.user._id,
+        title: req.body.title,
+        date: req.body.date,
+      },
       (err, result) => {
         console.log("Add: Complete");
         db.collection("counter").updateOne(
@@ -161,12 +203,26 @@ passport.deserializeUser((id, done) => {
   });
 });
 
+app.post("/register", (req, res) => {
+  db.collection("login").insertOne(
+    { id: req.body.id, pw: req.body.pw },
+    (err, result) => {
+      res.redirect("/");
+    }
+  );
+});
+
+app.post("/upload", upload.single("profile"), (req, res) => {
+  res.send("upload: complete");
+});
+
 app.delete("/delete", (req, res) => {
   req.body._id = parseInt(req.body._id);
-  db.collection("post").deleteOne(req.body, (err, result) => {
+  const deleteData = { _id: req.body._id, wrtier: req.user._id };
+  db.collection("post").deleteOne(deleteData, (err, result) => {
     if (err) {
       res.status(400);
-      return console.error(err);
+      return console.log("It is not your todo!");
     }
     res.status(200).send({ message: "Delete: Complete!" });
     res.redirect("/list");

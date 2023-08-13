@@ -16,48 +16,24 @@
       crossorigin="anonymous"
     />
 
+    <link rel="stylesheet" href="/public/main.css" />
+
     <title>Todo App</title>
   </head>
   <body>
     <%- include('nav.html') %>
 
-    <h4 class="container mt-4"><strong>Login</strong></h4>
-
-    <div class="container mt-3">
-      <form action="/login" method="POST">
-        <div class="form-group">
-          <label>Id</label>
-          <input type="text" class="form-control" name="id" />
-        </div>
-        <div class="form-group">
-          <label>Password</label>
-          <input type="password" class="form-control" name="pw" />
-        </div>
-        <button type="submit" class="btn btn-outline-secondary">Login</button>
-      </form>
-    </div>
-
     <div class="container mt-4">
-      <form action="/register" method="POST">
-        <div class="form-group">
-          <label>Id</label>
-          <input type="text" class="form-control" name="id" />
-        </div>
-        <div class="form-group">
-          <label>Password</label>
-          <input type="password" class="form-control" name="pw" />
-        </div>
-        <button type="submit" class="btn btn-danger">Register</button>
+      <h4 class="text-center">Upload Image</h4>
+      <form method="POST" action="/upload" enctype="multipart/form-data">
+        <input name="profile" type="file" />
+        <button type="submit">Upload</button>
       </form>
     </div>
 
     <!-- Optional JavaScript -->
     <!-- jQuery first, then Popper.js, then Bootstrap JS -->
-    <script
-      src="https://code.jquery.com/jquery-3.4.1.slim.min.js"
-      integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n"
-      crossorigin="anonymous"
-    ></script>
+
     <script
       src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"
       integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo"
