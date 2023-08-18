@@ -1,0 +1,58 @@
+!! what I learned !! 
+
+1. express
+- express is a node.js web application framework.
+- It has diverse libraries and middlewares developing web application.
+
+2. bodyParser
+- it is a middleware that parses the body of the request in a specified form.
+- bodyParser.urlencoded => returns middleware that only urelencoded bodies and only
+looks at requests where the Content-Type header mathces the type option.
+
+3. passport / serializeUser,deserializeUser
+- passport.js is the authentication middleware of Node.js that handles authentocation requests.
+- it is a package that provides basic login and authentication methods and manages the process under the Strategy.
+- return done => done function is where credentials are checked. Sending successful or unsuccessful credentials.
+- if successful, return done(null, {result}). if not, done(null, false, req.flash(message))
+- passport initialize() => initalize passport
+- passport session() -> it is often used for session management, if user is logged in or not.
+- serializeUser => after checking credentials, serializeUser get user form done(null,user), then save it in session.
+- deserializeUser => uses the session information (stored by the serializeUser) for each request that enters
+ the real server to match the data in the real DB Compare.
+
+4. express-session
+- it is a package that allows express to use a session.
+- app.use(session({ 
+  secret: 'keyboard cat',   // Encrypt the session
+  resave: false,            // Determining whether to always save sessions     
+  saveUninitialized: true,  // Decide whether save it to the store uninitialized or not
+  store: new FileStore()    // Format for storing data
+}));
+
+5. multer
+- It is middleware for uploading files in node.js.
+- destination => where the file is stored
+- filename => set the name when files are stored in the directory
+ -using multer.diskStorage({})
+
+6. app.use()
+- it is the middleware that the express app always runs.
+- it runs evry time the app receives a request.
+- The middleware at the top runs first, and later runs toward the bottom. 
+- Depending on whether or not the next is called, the next middleware may or may not be executed.
+
+7. REST
+- Representational State Trasfer
+- REST refers to sending a request to a resource (URI) to perform a CRUD (Create, Read, Update, Delta) operation on a resource.
+- 1. Uniform Interface
+=> One URL must import one data
+=> Make it simple and predictable
+- 2. Separate Client-server roles
+- 3. Stateless
+=> Requests must be handled independently of each other.
+- 4. Cacheable
+=> The data sent through the request must be cacheable.
+- 5. Layered System
+=> The request may be processed through multiple layers.
+- 6. Code on Demand
+=> The server can also send actual executable code to the customer.
